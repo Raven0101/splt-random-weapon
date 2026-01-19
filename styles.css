@@ -404,3 +404,15 @@ button:hover {
 .show-loading-btn:hover {
   background: #00f2fe;
 }
+
+.notice {
+  margin-top: 20px;
+  font-size: 14px;
+  opacity: 0.5;
+  text-align: center;
+}
+
+.notice a {
+  color: #4facfe;
+  cursor: pointer;
+}
