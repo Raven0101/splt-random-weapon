@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>斯普拉遁随机武器生成器</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        min-height: 100vh;
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .header p {
+        font-size: 0.9em;
+      }
+
+      .filters {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .filter-item {
+        flex: 1;
+        min-width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .filter-item label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 0.9em;
+      }
+
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      button {
+        background: #ff6b6b;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background: #ff5252;
+      }
+
+      .teams {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .team {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+      }
+
+      .team h2 {
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+      }
+
+      .player {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 12px;
+        margin-bottom: 8px;
+        border-radius: 5px;
+        border-left: 4px solid #4ecdc4;
+      }
+
+      .player h3 {
+        margin-bottom: 8px;
+        color: #ffd166;
+        font-size: 1.1em;
+      }
+
+      .weapon-info {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .weapon-item {
+        padding: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+
+      .weapon-item strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #ffd166;
+      }
+
+      .controls {
+        text-align: center;
+        margin: 15px 0;
+      }
+
+      .generate-btn {
+        background: #4ecdc4;
+        padding: 12px 25px;
+        font-size: 16px;
+        width: auto;
+        max-width: 250px;
+        margin: 0 auto;
+      }
+
+      .generate-btn:hover {
+        background: #3db9b1;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        font-size: 1.1em;
+      }
+
+      .error {
+        color: #ff6b6b;
+        text-align: center;
+        padding: 20px;
+        font-size: 1.1em;
+      }
+
+      /* 移动端特定样式 */
+      @media (max-width: 768px) {
+        body {
+          padding: 5px;
+        }
+
+        .header h1 {
+          font-size: 1.6em;
+        }
+
+        .filter-group {
+          flex-direction: column;
+        }
+
+        .filter-item {
+          min-width: 100%;
+        }
+
+        .teams {
+          gap: 10px;
+        }
+
+        .team {
+          padding: 10px;
+        }
+
+        .team h2 {
+          font-size: 1.2em;
+        }
+
+        .player {
+          padding: 10px;
+        }
+
+        .weapon-info {
+          grid-template-columns: 1fr;
+        }
+
+        .generate-btn {
+          padding: 10px 20px;
+          font-size: 15px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 5px;
+          font-size: 13px;
+        }
+
+        .header h1 {
+          font-size: 1.4em;
+        }
+
+        .filters {
+          padding: 10px;
+        }
+
+        .filter-group {
+          gap: 8px;
+        }
+
+        .filter-item {
+          margin-bottom: 8px;
+        }
+
+        .team h2 {
+          font-size: 1.1em;
+        }
+
+        .player {
+          padding: 8px;
+        }
+
+        .weapon-item {
+          font-size: 0.85em;
+        }
+
+        .generate-btn {
+          padding: 9px 18px;
+          font-size: 14px;
+          max-width: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <div class="header">
+          <h1>⚔️ 随机武器生成器 ⚔️</h1>
+        </div>
+
+        <div class="filters">
+          <h2>筛选器</h2>
+          <div class="filter-group">
+            <div class="filter-item">
+              <label for="primaryType">主武器类型:</label>
+              <select v-model="selectedPrimaryType" id="primaryType">
+                <option value="">全部</option>
+                <option v-for="type in primaryTypes" :key="type" :value="type">
+                  {{ type }}
+                </option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="secondary">副武器:</label>
+              <select v-model="selectedSecondary" id="secondary">
+                <option value="">全部</option>
+                <option
+                  v-for="weapon in secondaryWeapons"
+                  :key="weapon"
+                  :value="weapon">
+                  {{ weapon }}
+                </option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label for="special">特殊武器:</label>
+              <select v-model="selectedSpecial" id="special">
+                <option value="">全部</option>
+                <option
+                  v-for="weapon in specialWeapons"
+                  :key="weapon"
+                  :value="weapon">
+                  {{ weapon }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-item">
+              <button @click="resetFilters" class="reset-btn">
+                重置筛选器
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button @click="generateTeams" class="generate-btn">
+            🎲 生成武器配置
+          </button>
+        </div>
+
+        <div class="teams">
+          <div class="team">
+            <h2>🛡️ A队</h2>
+            <div
+              v-for="(player, index) in teamA"
+              :key="'a'+index"
+              class="player">
+              <h3>玩家 {{ index + 1 }}</h3>
+              <div class="weapon-info">
+                <div class="weapon-item">
+                  <strong>主武器:</strong> {{ player.primary.name }}
+                </div>
+                <div class="weapon-item">
+                  <strong>类型:</strong> {{ player.primary.type }}
+                </div>
+                <div class="weapon-item">
+                  <strong>副武器:</strong> {{ player.secondary }}
+                </div>
+                <div class="weapon-item">
+                  <strong>特殊武器:</strong> {{ player.special }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="team">
+            <h2>⚔️ B队</h2>
+            <div
+              v-for="(player, index) in teamB"
+              :key="'b'+index"
+              class="player">
+              <h3>玩家 {{ index + 1 }}</h3>
+              <div class="weapon-info">
+                <div class="weapon-item">
+                  <strong>主武器:</strong> {{ player.primary.name }}
+                </div>
+                <div class="weapon-item">
+                  <strong>类型:</strong> {{ player.primary.type }}
+                </div>
+                <div class="weapon-item">
+                  <strong>副武器:</strong> {{ player.secondary }}
+                </div>
+                <div class="weapon-item">
+                  <strong>特殊武器:</strong> {{ player.special }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+    
+    createApp({
+      setup() {
+        // 模拟JSON数据加载
+        // ... existing code ...
+        // Load weapon data from external JSON file
+        const weaponsData = ref(null);
+        
+        // Fetch the weapons data from the external JSON file
+        fetch('./weapons-data.json')
+          .then(response => response.json())
+          .then(data => {
+            weaponsData.value = data;
+          })
+          .catch(error => {
+            console.error('Error loading weapons data:', error);
+            // Fallback to default data if JSON file fails to load
+            weaponsData.value = {
+              primary: [
+                {"name": "突击步枪 MK1", "type": "突击步枪"},
+                {"name": "狙击枪 AWP", "type": "狙击步枪"},
+                {"name": "冲锋枪 MP5", "type": "冲锋枪"},
+                {"name": "霰弹枪 M1014", "type": "霰弹枪"},
+                {"name": "轻机枪 M249", "type": "轻机枪"},
+                {"name": "手枪 Desert Eagle", "type": "手枪"},
+                {"name": "卡宾枪 M4A1", "type": "突击步枪"},
+                {"name": "狙击枪 SVD", "type": "狙击步枪"},
+                {"name": "冲锋枪 UZI", "type": "冲锋枪"},
+                {"name": "霰弹枪 SPAS-12", "type": "霰弹枪"},
+                {"name": "轻机枪 MG3", "type": "轻机枪"},
+                {"name": "手枪 Glock-18", "type": "手枪"},
+                {"name": "突击步枪 AK-47", "type": "突击步枪"},
+                {"name": "狙击枪 M82", "type": "狙击步枪"},
+                {"name": "冲锋枪 P90", "type": "冲锋枪"}
+              ],
+              secondary: [
+                "格洛克17", "USP", "P226", "Five-seveN", 
+                "P99", "CZ75", "R8 左轮", "双持贝瑞塔",
+                "沙鹰", "FNX-45", "VP9", "M1911"
+              ],
+              special: [
+                "闪光弹", "烟雾弹", "燃烧瓶", "震撼弹",
+                "手雷", "电击枪", "激光瞄准器", "战术匕首",
+                "防弹盾牌", "无人机", "EMP手雷", "遥控炸弹"
+              ]
+            };
+          });
+// ... existing code ...
+        
+        // 计算属性获取类型
+        const primaryTypes = computed(() => {
+          return [...new Set(weaponsData.value.primary.map(weapon => weapon.type))];
+        });
+        
+        const secondaryWeapons = computed(() => {
+          return weaponsData.value.secondary;
+        });
+        
+        const specialWeapons = computed(() => {
+          return weaponsData.value.special;
+        });
+        
+        // 筛选条件
+        const selectedPrimaryType = ref("");
+        const selectedSecondary = ref("");
+        const selectedSpecial = ref("");
+        
+        // 团队数据
+        const teamA = ref([]);
+        const teamB = ref([]);
+        
+        // 重置筛选器
+        function resetFilters() {
+          selectedPrimaryType.value = "";
+          selectedSecondary.value = "";
+          selectedSpecial.value = "";
+        }
+        
+        // 随机选择函数
+        function getRandomItem(array) {
+          if (array.length === 0) return null;
+          const randomIndex = Math.floor(Math.random() * array.length);
+          return array[randomIndex];
+        }
+        
+        // 生成团队武器配置
+        function generateTeams() {
+          teamA.value = [];
+          teamB.value = [];
+          
+          for (let i = 0; i < 4; i++) {
+            // 为A队生成玩家武器
+            const aPlayer = {
+              primary: getRandomItem(
+                selectedPrimaryType.value 
+                  ? weaponsData.value.primary.filter(w => w.type === selectedPrimaryType.value)
+                  : weaponsData.value.primary
+              ),
+              secondary: selectedSecondary.value || getRandomItem(weaponsData.value.secondary),
+              special: selectedSpecial.value || getRandomItem(weaponsData.value.special)
+            };
+            teamA.value.push(aPlayer);
+            
+            // 为B队生成玩家武器
+            const bPlayer = {
+              primary: getRandomItem(
+                selectedPrimaryType.value 
+                  ? weaponsData.value.primary.filter(w => w.type === selectedPrimaryType.value)
+                  : weaponsData.value.primary
+              ),
+              secondary: selectedSecondary.value || getRandomItem(weaponsData.value.secondary),
+              special: selectedSpecial.value || getRandomItem(weaponsData.value.special)
+            };
+            teamB.value.push(bPlayer);
+          }
+        }
+        
+        return {
+          weaponsData,
+          primaryTypes,
+          secondaryWeapons,
+          specialWeapons,
+          selectedPrimaryType,
+          selectedSecondary,
+          selectedSpecial,
+          teamA,
+          teamB,
+          resetFilters,
+          generateTeams
+        };
+      }
+    }).mount('#app');
+  </script> -->
+    <script>
+      fetch(
+        'https://splatoon.com.cn/api/datasource/weapon/weapon/list?page=1&perPage=20&orderBy=splatnet&sort=ASC&pagination=true&toolbar=true&toolbarParams=%5B%7B%22type%22:%22checkbox%22,%22paramName%22:%22version%22,%22label%22:%222%E4%BB%A3%E6%95%B0%E6%8D%AE%22,%22value%22:2,%22check%22:false%7D,%7B%22type%22:%22checkbox%22,%22paramName%22:%22version%22,%22label%22:%223%E4%BB%A3%E6%95%B0%E6%8D%AE%22,%22value%22:3,%22check%22:true%7D%5D&version=3'
+      ).then((res) => {
+        console.log(res)
+      })
+    </script>
+  </body>
+</html>
