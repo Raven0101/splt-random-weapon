@@ -10,14 +10,19 @@
 
   <body>
     <div id="app">
-      <!-- <div class="container loading" v-if="loading">加载中……</div> -->
+      <div id="loadingOverlay" class="loading-overlay">
+        <div class="water-container">
+          <div class="water-ripple"></div>
+        </div>
+        <div class="loading-text">LOADING...</div>
+      </div>
       <div class="container">
         <div class="header">
           <h1>斯普拉遁随机武器生成器</h1>
         </div>
 
         <div class="filters">
-          <h2>筛选器</h2>
+          <h2 class="filter-title">筛选器</h2>
           <div class="filter-group">
             <div class="filter-item">
               <label for="primaryType"
@@ -98,11 +103,18 @@
                   <strong>类型:</strong> {{ item.type_id }}
                 </div> -->
                 <div class="weapon-info-sub">
-                  <div class="weapon-item type">
+                  <div
+                    :class="`weapon-item ${item.type_id==selectedPrimaryType?'type':''}`">
                     {{ findTypeName(item.type_id )}}
                   </div>
-                  <div class="weapon-item">{{ item.sub_weapon.name }}</div>
-                  <div class="weapon-item">{{ item.special_weapon.name }}</div>
+                  <div
+                    :class="`weapon-item  ${item.sub_weapon_id==selectedSecondary?'type':''}`">
+                    {{ item.sub_weapon.name }}
+                  </div>
+                  <div
+                    :class="`weapon-item ${item.special_weapon_id==selectedSpecial?'type':''}`">
+                    {{ item.special_weapon.name }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -110,20 +122,28 @@
 
           <div class="team">
             <h2>B队</h2>
-            <div v-for="(item, index) in teamB" :key="'b'+index" class="player">
-              <h3>玩家 {{ index + 1 }}</h3>
+            <div v-for="(item, index) in teamB" :key="'a'+index" class="player">
+              <!-- <h3>玩家 {{ index + 1 }}</h3> -->
               <div class="weapon-info">
-                <div class="weapon-item">
-                  <strong>主武器:</strong> {{ item.name }}
+                <div class="weapon-item-main">
+                  <strong> {{ item.name }}</strong>
                 </div>
                 <!-- <div class="weapon-item">
                   <strong>类型:</strong> {{ item.type_id }}
                 </div> -->
-                <div class="weapon-item">
-                  <strong>副武器:</strong> {{ item.sub_weapon.name }}
-                </div>
-                <div class="weapon-item">
-                  <strong>特殊武器:</strong> {{ item.special_weapon.name }}
+                <div class="weapon-info-sub">
+                  <div
+                    :class="`weapon-item ${item.type_id==selectedPrimaryType?'type':''}`">
+                    {{ findTypeName(item.type_id )}}
+                  </div>
+                  <div
+                    :class="`weapon-item  ${item.sub_weapon_id==selectedSecondary?'type':''}`">
+                    {{ item.sub_weapon.name }}
+                  </div>
+                  <div
+                    :class="`weapon-item ${item.special_weapon_id==selectedSpecial?'type':''}`">
+                    {{ item.special_weapon.name }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -151,6 +171,18 @@
           // 团队数据
           const teamA = ref([])
           const teamB = ref([])
+
+          // window.addEventListener('load', function () {
+          //   setTimeout(function () {
+          //     // 开始渐隐动画
+          //     const overlay = document.getElementById('loadingOverlay')
+          //     overlay.classList.add('fade-out')
+          //     // 在渐隐动画结束后隐藏元素
+          //     setTimeout(function () {
+          //       overlay.classList.add('hidden')
+          //     }, 200) // 与CSS中的transition时间一致
+          //   }, 1000) // 1秒后开始渐隐，与动画时间同步
+          // })
           // all weapons
           fetch(
             'https://splatoon.com.cn/api/datasource/weapon/weapon/list?page=1&perPage=200&orderBy=splatnet&sort=ASC&pagination=true&toolbar=true&toolbarParams=%5B%7B%22type%22:%22checkbox%22,%22paramName%22:%22version%22,%22label%22:%222%E4%BB%A3%E6%95%B0%E6%8D%AE%22,%22value%22:2,%22check%22:false%7D,%7B%22type%22:%22checkbox%22,%22paramName%22:%22version%22,%22label%22:%223%E4%BB%A3%E6%95%B0%E6%8D%AE%22,%22value%22:3,%22check%22:true%7D%5D&version=3'
@@ -254,8 +286,16 @@
 
           watch(
             () => loading.value,
-            () => {
+            (n, o) => {
               console.log('watch loading :>> ', loading.value)
+              if (n == false) {
+                const overlay = document.getElementById('loadingOverlay')
+                overlay.classList.add('fade-out')
+                // 在渐隐动画结束后隐藏元素
+                setTimeout(function () {
+                  overlay.classList.add('hidden')
+                }, 200) // 与CSS中的transition时间一致
+              }
             },
             {
               immdiate: true,
