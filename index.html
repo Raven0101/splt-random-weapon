@@ -22,57 +22,66 @@
         </div>
 
         <div class="filters">
-          <h2 class="filter-title">筛选器</h2>
           <div class="filter-group">
-            <div class="filter-item">
-              <label for="primaryType"
-                >{{`主武器类型(${mainTypes.length})`}}</label
-              >
-              <select v-model="selectedPrimaryType" id="primaryType">
-                <option value="">全部</option>
-                <option
-                  v-for="item in mainTypes"
-                  :key="item.id"
-                  :value="item.id">
-                  {{item.name }}
-                </option>
-              </select>
-            </div>
-
-            <div class="filter-item">
-              <label for="secondary">{{`副武器(${subWeapons.length})`}}</label>
-              <select v-model="selectedSecondary" id="secondary">
-                <option value="">全部</option>
-                <option
-                  v-for="item in subWeapons"
-                  :key="item.id"
-                  :value="item.id">
-                  {{ item.name }}
-                </option>
-              </select>
-            </div>
-
-            <div class="filter-item">
-              <label for="special"
-                >{{`特殊武器(${specialWeapons.length})`}}</label
-              >
-              <select v-model="selectedSpecial" id="special">
-                <option value="">全部</option>
-                <option
-                  v-for="item in specialWeapons"
-                  :key="item.id"
-                  :value="item.id">
-                  {{ item.name }}
-                </option>
-              </select>
-            </div>
+            <h2>筛选器</h2>
+            <span @click="showSelector = !showSelector"
+              >{{showSelector?'收起':'展开'}}</span
+            >
           </div>
+          <div v-if="showSelector">
+            <div class="filter-group">
+              <div class="filter-item">
+                <label for="primaryType"
+                  >{{`主武器类型(${mainTypes.length})`}}</label
+                >
+                <select v-model="selectedPrimaryType" id="primaryType">
+                  <option value="">全部</option>
+                  <option
+                    v-for="item in mainTypes"
+                    :key="item.id"
+                    :value="item.id">
+                    {{item.name }}
+                  </option>
+                </select>
+              </div>
 
-          <div class="filter-group">
-            <div class="filter-item">
-              <button type="button" @click="resetFilters" class="reset-btn">
-                重置筛选器
-              </button>
+              <div class="filter-item">
+                <label for="secondary"
+                  >{{`副武器(${subWeapons.length})`}}</label
+                >
+                <select v-model="selectedSecondary" id="secondary">
+                  <option value="">全部</option>
+                  <option
+                    v-for="item in subWeapons"
+                    :key="item.id"
+                    :value="item.id">
+                    {{ item.name }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="filter-item">
+                <label for="special"
+                  >{{`特殊武器(${specialWeapons.length})`}}</label
+                >
+                <select v-model="selectedSpecial" id="special">
+                  <option value="">全部</option>
+                  <option
+                    v-for="item in specialWeapons"
+                    :key="item.id"
+                    :value="item.id">
+                    {{ item.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <div class="filter-item">
+                <button type="button" @click="resetFilters" class="reset-btn">
+                  重置筛选器
+                </button>
+              </div>
             </div>
           </div>
           <div class="filter-group">
@@ -162,7 +171,7 @@
       </div>
     </div>
 
-    <script>
+    <script lang="javascript">
       const { createApp, ref, computed, onMounted, watch } = Vue
 
       createApp({
@@ -178,6 +187,7 @@
           const selectedPrimaryType = ref('')
           const selectedSecondary = ref('')
           const selectedSpecial = ref('')
+          const showSelector=ref(true)
           // 团队数据
           const teamA = ref([])
           const teamB = ref([])
@@ -297,7 +307,6 @@
           watch(
             () => loading.value,
             (n, o) => {
-              console.log('watch loading :>> ', loading.value)
               if (n == false) {
                 const overlay = document.getElementById('loadingOverlay')
                 overlay.classList.add('fade-out')
@@ -391,6 +400,7 @@
             selectedPrimaryType,
             selectedSecondary,
             selectedSpecial,
+            showSelector,
             resetFilters,
             generateTeams,
             findTypeName,
